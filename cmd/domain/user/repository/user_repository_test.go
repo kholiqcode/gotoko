@@ -48,7 +48,7 @@ func InitConnection() (sqlmock.Sqlmock, UserRepositoryImpl) {
 
 func TestUserRepository_FindAllFail(t *testing.T) {
 	sqlMock, userRepo := InitConnection()
-	sqlMock.ExpectQuery("SELECT * FROM `users`").
+	sqlMock.ExpectQuery("SELECT * FROM `users` WHERE `users`.`deleted_at` IS NULL").
 		WillReturnError(errors.New("can't fetch to mock db"))
 
 	users, err := userRepo.FindAll()
@@ -58,7 +58,7 @@ func TestUserRepository_FindAllFail(t *testing.T) {
 
 func TestUserRepository_FindAllSuccess(t *testing.T) {
 	sqlMock, userRepo := InitConnection()
-	sqlMock.ExpectQuery("SELECT * FROM `users`").WillReturnRows(sqlmock.NewRows([]string{"id", "name", "email", "password", "created_at", "updated_at"}))
+	sqlMock.ExpectQuery("SELECT * FROM `users` WHERE `users`.`deleted_at` IS NULL").WillReturnRows(sqlmock.NewRows([]string{"id", "name", "email", "password", "created_at", "updated_at"}))
 	users, err := userRepo.FindAll()
 
 	assert.Nil(t, err)
@@ -68,7 +68,7 @@ func TestUserRepository_FindAllSuccess(t *testing.T) {
 func TestUserRepository_FindFail(t *testing.T) {
 	sqlMock, userRepo := InitConnection()
 	sqlMock.ExpectQuery(regexp.QuoteMeta(
-		"SELECT * FROM `users` WHERE `users`.`id` = ? ORDER BY `users`.`id` LIMIT 1")).
+		"SELECT * FROM `users` WHERE `users`.`id` = ? AND `users`.`deleted_at` IS NULL ORDER BY `users`.`id` LIMIT 1")).
 		WillReturnError(errors.New("can't fetch to mock db"))
 	users, err := userRepo.FindAll()
 	assert.NotNil(t, err)
@@ -85,7 +85,7 @@ func TestUserRepository_FindSuccess(t *testing.T) {
 		createdAt time.Time = time.Now()
 		updatedAt time.Time = time.Now()
 	)
-	sqlMock.ExpectQuery("SELECT * FROM `users` WHERE `users`.`id` = ? ORDER BY `users`.`id` LIMIT 1").WithArgs(id).WillReturnRows(sqlmock.NewRows([]string{"id", "name", "email", "password", "created_at", "updated_at"}).AddRow(id, name, email, password, createdAt, updatedAt))
+	sqlMock.ExpectQuery("SELECT * FROM `users` WHERE `users`.`id` = ? AND `users`.`deleted_at` IS NULL ORDER BY `users`.`id` LIMIT 1").WithArgs(id).WillReturnRows(sqlmock.NewRows([]string{"id", "name", "email", "password", "created_at", "updated_at"}).AddRow(id, name, email, password, createdAt, updatedAt))
 	users, err := userRepo.Find(id)
 
 	assert.Nil(t, err)
@@ -95,7 +95,7 @@ func TestUserRepository_FindSuccess(t *testing.T) {
 
 func TestUserRepository_FindByEmailFail(t *testing.T) {
 	sqlMock, userRepo := InitConnection()
-	sqlMock.ExpectQuery("SELECT * FROM `users` WHERE `users`.`email` = ? ORDER BY `users`.`id` LIMIT 1").
+	sqlMock.ExpectQuery("SELECT * FROM `users` WHERE email = ? AND `users`.`deleted_at` IS NULL ORDER BY `users`.`id` LIMIT 1").
 		WillReturnError(errors.New("can't fetch to mock db"))
 
 	users, err := userRepo.FindAll()
@@ -114,7 +114,7 @@ func TestUserRepository_FindByEmailSuccess(t *testing.T) {
 		updatedAt time.Time = time.Now()
 	)
 
-	sqlMock.ExpectQuery("SELECT * FROM `users` WHERE email = ? ORDER BY `users`.`id` LIMIT 1").WithArgs(email).WillReturnRows(sqlmock.NewRows([]string{"id", "name", "email", "password", "created_at", "updated_at"}).AddRow(id, name, email, password, createdAt, updatedAt))
+	sqlMock.ExpectQuery("SELECT * FROM `users` WHERE email = ? AND `users`.`deleted_at` IS NULL ORDER BY `users`.`id` LIMIT 1").WithArgs(email).WillReturnRows(sqlmock.NewRows([]string{"id", "name", "email", "password", "created_at", "updated_at"}).AddRow(id, name, email, password, createdAt, updatedAt))
 	users, err := userRepo.FindByEmail(email)
 
 	assert.Nil(t, err)
@@ -124,7 +124,16 @@ func TestUserRepository_FindByEmailSuccess(t *testing.T) {
 
 func TestUserRepository_InsertFail(t *testing.T) {
 	sqlMock, userRepo := InitConnection()
-	sqlMock.ExpectExec("INSERT INTO `users` WHERE `users`.`email` = ? ORDER BY `users`.`id` LIMIT 1").
+	var (
+		//id        uint      = 1
+		name      string  = "Abdul Kholiq"
+		email     string  = "kholiqdev@icloud.com"
+		password  string  = "bismillah"
+		createdAt AnyTime = AnyTime{}
+		updatedAt AnyTime = AnyTime{}
+	)
+
+	sqlMock.ExpectExec("INSERT INTO `users` (`name`,`email`,`password`,`created_at`,`updated_at`,`deleted_at`) VALUES (?,?,?,?,?,?)").WithArgs(name, email, password, createdAt, updatedAt, nil).
 		WillReturnError(errors.New("can't fetch to mock db"))
 
 	userEntity := entity.User{
@@ -150,8 +159,8 @@ func TestUserRepository_InsertSuccess(t *testing.T) {
 	)
 
 	sqlMock.ExpectBegin()
-	sqlMock.ExpectExec("INSERT INTO `users` (`name`,`email`,`password`,`created_at`,`updated_at`) VALUES (?,?,?,?,?)").
-		WithArgs(name, email, password, createdAt, updatedAt).
+	sqlMock.ExpectExec("INSERT INTO `users` (`name`,`email`,`password`,`created_at`,`updated_at`,`deleted_at`) VALUES (?,?,?,?,?,?)").
+		WithArgs(name, email, password, createdAt, updatedAt, nil).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	sqlMock.ExpectCommit()
 

@@ -22,16 +22,28 @@ func (r ProductRepositoryImpl) FindAll(pagination *database.Pagination) (*entity
 }
 
 func (r ProductRepositoryImpl) Find(productID uint) (*entity.Product, error) {
-	//TODO implement me
-	panic("implement me")
+	var product entity.Product
+
+	if e := r.Db.Debug().Preload("ProductCategory.Category").Preload("ProductGallery").Preload(clause.Associations).First(&product, productID).Error; e != nil {
+		return nil, e
+	}
+
+	return &product, nil
 }
 
 func (r ProductRepositoryImpl) FindBySlug(slug string) (*entity.Product, error) {
-	//TODO implement me
-	panic("implement me")
+	var product entity.Product
+
+	if e := r.Db.Debug().Preload("ProductCategory.Category").Preload("ProductGallery").Preload(clause.Associations).First(&product, "slug = ?", slug).Error; e != nil {
+		return nil, e
+	}
+
+	return &product, nil
 }
 
 func (r ProductRepositoryImpl) Insert(product *entity.Product) (*entity.Product, error) {
-	//TODO implement me
-	panic("implement me")
+	if e := r.Db.Debug().Create(&product).Preload("ProductCategory.Category").Error; e != nil {
+		return nil, e
+	}
+	return product, nil
 }

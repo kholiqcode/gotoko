@@ -70,7 +70,7 @@ func TestUserHandler_CreateFail(t *testing.T) {
 	bodyRes, _ := ioutil.ReadAll(w.Result().Body)
 	defer r.Body.Close()
 
-	assert.Equal(t, 500, w.Result().StatusCode)
+	assert.Equal(t, 400, w.Result().StatusCode)
 	assert.NotContains(t, string(bodyRes), "Success", "Not Contains Success Message")
 }
 

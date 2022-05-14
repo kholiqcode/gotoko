@@ -7,9 +7,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog/log"
+	"time"
 	"toko/config"
 	"toko/internal/protocol/http/response"
-	"time"
 )
 
 func JwtVerifyAccess() echo.MiddlewareFunc {
@@ -25,11 +25,11 @@ func JwtVerifyAccess() echo.MiddlewareFunc {
 					return nil, errors.New("unexpected jwt signing method")
 				} else if claims["token_type"] != "access_token" {
 					log.Err(errors.New("unexpected token type")).Msgf("unexpected token type: %v", claims["token_type"])
-					response.Err(c, fmt.Errorf("unexpected token type %v", claims["token_type"]))
+					response.Err(c, 401, fmt.Errorf("unexpected token type %v", claims["token_type"]))
 					return nil, fmt.Errorf("unexpected token type %v", claims["token_type"])
 				} else if exp < time.Now().Unix() {
 					log.Err(errors.New("token expired")).Msgf("token expired: %v", exp)
-					response.Err(c, errors.New("token expired"))
+					response.Err(c, 401, errors.New("token expired"))
 					return nil, errors.New("token expired")
 				}
 
@@ -45,6 +45,8 @@ func JwtVerifyAccess() echo.MiddlewareFunc {
 				log.Err(errors.New("invalid token")).Msgf("invalid token: %v", token.Raw)
 				return nil, errors.New("invalid token")
 			}
+			//Send User Auth To Context
+			c.Set("user_id", token.Claims.(jwt.MapClaims)["id"])
 			return token, nil
 		},
 	})
@@ -63,11 +65,11 @@ func JwtVerifyRefresh() echo.MiddlewareFunc {
 					return nil, errors.New("unexpected jwt signing method")
 				} else if claims["token_type"] != "refresh_token" {
 					log.Err(errors.New("unexpected token type")).Msgf("unexpected token type: %v", claims["token_type"])
-					response.Err(c, fmt.Errorf("unexpected token type %v", claims["token_type"]))
+					response.Err(c, 401, fmt.Errorf("unexpected token type %v", claims["token_type"]))
 					return nil, fmt.Errorf("unexpected token type %v", claims["token_type"])
 				} else if exp < time.Now().Unix() {
 					log.Err(errors.New("token expired")).Msgf("token expired: %v", exp)
-					response.Err(c, errors.New("token expired"))
+					response.Err(c, 401, errors.New("token expired"))
 					return nil, errors.New("token expired")
 				}
 

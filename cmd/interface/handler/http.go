@@ -37,6 +37,7 @@ func (h *HttpHandlerImpl) RegisterPath(e *echo.Echo) {
 	authGroup := e.Group("auth")
 	{
 		authGroup.POST("/login", h.user.Login)
+		authGroup.POST("/register", h.user.Create)
 		authGroup.POST("/refresh", h.user.Refresh, auth.JwtVerifyRefresh())
 	}
 
@@ -44,12 +45,13 @@ func (h *HttpHandlerImpl) RegisterPath(e *echo.Echo) {
 	userGroup := e.Group("user")
 	{
 		userGroup.GET("", h.user.Get, auth.JwtVerifyAccess())
-		userGroup.POST("", h.user.Create)
+		userGroup.GET("/:id", h.user.Detail)
 	}
 
 	productGroup := e.Group("product")
 	{
 		productGroup.GET("", h.product.Get)
+		productGroup.GET("/:slug", h.product.Detail)
 		productGroup.POST("", h.product.Create)
 	}
 }

@@ -3,6 +3,7 @@ package product
 import (
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"toko/cmd/domain/product/dto"
 	"toko/cmd/domain/product/service"
 	"toko/internal/protocol/http/response"
 	"toko/pkg/database"
@@ -19,12 +20,12 @@ func (h ProductHandlerImpl) Get(ctx echo.Context) error {
 	products, err := h.Svc.GetProducts(pagination)
 
 	if err != nil {
-		response.Err(ctx, err)
+		response.Err(ctx, 400, err)
 		return err
 	}
 
 	response.Json(ctx, http.StatusOK, "Success", map[string]interface{}{
-		"users": map[string]interface{}{
+		"products": map[string]interface{}{
 			"data":      products,
 			"sort":      pagination.GetSort(),
 			"page":      pagination.GetPage(),
@@ -37,11 +38,33 @@ func (h ProductHandlerImpl) Get(ctx echo.Context) error {
 }
 
 func (h ProductHandlerImpl) Detail(ctx echo.Context) error {
-	//TODO implement me
-	panic("implement me")
+	slug := ctx.Param("slug")
+
+	product, err := h.Svc.GetProductBySlug(slug)
+
+	if err != nil {
+		response.Err(ctx, 400, err)
+		return err
+	}
+	response.Json(ctx, http.StatusOK, "Success", product)
+	return nil
 }
 
 func (h ProductHandlerImpl) Create(ctx echo.Context) error {
-	//TODO implement me
-	panic("implement me")
+	var productStoreDto dto.ProductStoreRequest
+
+	if err := ctx.Bind(&productStoreDto); err != nil {
+		response.Err(ctx, 400, err)
+		return err
+	}
+
+	product, err := h.Svc.Store(&productStoreDto)
+
+	if err != nil {
+		response.Err(ctx, 400, err)
+		return err
+	}
+
+	response.Json(ctx, http.StatusCreated, "Success", product)
+	return nil
 }
