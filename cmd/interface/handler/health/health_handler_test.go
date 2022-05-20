@@ -17,10 +17,10 @@ func TestHealthHandler_GetHealthSuccess(t *testing.T) {
 
 	responseData := struct {
 		Message string `json:"message"`
-		Data    struct {
+		Result  struct {
 			Host       string `json:"host"`
 			DeployedAt string `json:"deployed_at"`
-		} `json:"data"`
+		} `json:"result"`
 	}{}
 
 	e := echo.New()
@@ -36,7 +36,7 @@ func TestHealthHandler_GetHealthSuccess(t *testing.T) {
 	if assert.NoError(t, healthHandler.GetHealth(ctx)) {
 		assert.Equal(t, 200, w.Result().StatusCode)
 		assert.Equal(t, responseData.Message, "Success")
-		assert.Equal(t, responseData.Data.Host, host)
+		assert.Equal(t, responseData.Result.Host, host)
 	} else {
 		t.Fatalf("handler error")
 	}

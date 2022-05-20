@@ -1,12 +1,14 @@
 //go:build wireinject
 // +build wireinject
 
-package init
+package main
 
 import (
 	"github.com/google/wire"
 	"toko/cmd/interface/handler"
+	"toko/cmd/interface/handler/cart"
 	"toko/cmd/interface/handler/health"
+	"toko/cmd/interface/handler/order"
 	"toko/cmd/interface/handler/product"
 	"toko/cmd/interface/handler/user"
 	"toko/config"
@@ -44,6 +46,8 @@ func InitHttpProtocol(mode string) (*http.HttpImpl, error) {
 		),
 		user.ProviderSet,
 		product.ProviderSet,
+		cart.ProviderSet,
+		order.ProviderSet,
 		health.ProviderSet,
 	))
 }

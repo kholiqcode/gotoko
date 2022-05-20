@@ -2,16 +2,18 @@ package http
 
 import (
 	"context"
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
 	"net/http"
 	"os"
 	"os/signal"
-	"toko/config"
-	"toko/internal/protocol/http/router"
 	"strconv"
 	"syscall"
 	"time"
+	"toko/config"
+	"toko/internal/protocol/http/request"
+	"toko/internal/protocol/http/router"
 )
 
 type HttpImpl struct {
@@ -33,6 +35,8 @@ func (p *HttpImpl) setupRouter(e *echo.Echo) {
 func (p *HttpImpl) Listen() {
 	// Echo instance
 	e := echo.New()
+
+	e.Validator = &request.Validator{Validator: validator.New()}
 
 	p.setupRouter(e)
 

@@ -7,16 +7,18 @@ import (
 )
 
 type Response struct {
-	Message string      `json:"message,omitempty"`
-	Data    interface{} `json:"data,omitempty"`
+	Code    int         `json:"code"`
+	Message string      `json:"message"`
+	Result  interface{} `json:"result"`
 }
 
 func Json(c echo.Context, httpCode int, message string, data interface{}) {
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	c.Response().WriteHeader(httpCode)
 	res := Response{
+		Code:    httpCode,
 		Message: message,
-		Data:    data,
+		Result:  data,
 	}
 	json.NewEncoder(c.Response()).Encode(res)
 }
@@ -28,7 +30,7 @@ func Text(c echo.Context, httpCode int, message string) {
 }
 
 // TODO: implement response error
-func Err(c echo.Context, err error) {
+func Err(c echo.Context, httpCode int, err error) {
 	_, ok := err.(*errors.RespError)
 	if !ok {
 		err = errors.InternalServerError(err.Error())
@@ -36,8 +38,9 @@ func Err(c echo.Context, err error) {
 
 	er, _ := err.(*errors.RespError)
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().WriteHeader(er.Code)
+	c.Response().WriteHeader(httpCode)
 	res := Response{
+		Code:    httpCode,
 		Message: er.Message,
 	}
 	json.NewEncoder(c.Response()).Encode(res)

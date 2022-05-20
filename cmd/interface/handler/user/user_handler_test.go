@@ -16,7 +16,7 @@ import (
 )
 
 var userService = &service.UserServiceMock{Mock: mock.Mock{}}
-var userHandler = UserHandlerImpl{Svc: userService}
+var userHandler = UserHandlerImpl{SvcUser: userService}
 
 func TestUserHandler_GetSuccess(t *testing.T) {
 	user := entity.User{
@@ -31,9 +31,9 @@ func TestUserHandler_GetSuccess(t *testing.T) {
 
 	dataResponse := struct {
 		Message string `json:"message"`
-		Data    struct {
+		Result  struct {
 			Users dto.UserListResponse `json:"users"`
-		} `json:"data"`
+		} `json:"result"`
 	}{}
 
 	e := echo.New()
@@ -48,7 +48,7 @@ func TestUserHandler_GetSuccess(t *testing.T) {
 
 	assert.Equal(t, 200, w.Result().StatusCode)
 	assert.EqualValues(t, dataResponse.Message, "Success")
-	assert.EqualValues(t, dataResponse.Data.Users[0].Email, user.Email)
+	assert.EqualValues(t, dataResponse.Result.Users[0].Email, user.Email)
 
 }
 
@@ -70,7 +70,7 @@ func TestUserHandler_CreateFail(t *testing.T) {
 	bodyRes, _ := ioutil.ReadAll(w.Result().Body)
 	defer r.Body.Close()
 
-	assert.Equal(t, 500, w.Result().StatusCode)
+	assert.Equal(t, 400, w.Result().StatusCode)
 	assert.NotContains(t, string(bodyRes), "Success", "Not Contains Success Message")
 }
 
