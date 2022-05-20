@@ -10,11 +10,11 @@ import (
 )
 
 type UserHandlerImpl struct {
-	Svc service.UserService
+	SvcUser service.UserService
 }
 
 func (h UserHandlerImpl) Get(ctx echo.Context) error {
-	users, err := h.Svc.GetUsers()
+	users, err := h.SvcUser.GetUsers()
 
 	if err != nil {
 		response.Err(ctx, http.StatusBadRequest, err)
@@ -34,7 +34,7 @@ func (h UserHandlerImpl) Detail(ctx echo.Context) error {
 		return err
 	}
 
-	user, err := h.Svc.GetUserById(uint(id))
+	user, err := h.SvcUser.GetUserById(uint(id))
 
 	if err != nil {
 		response.Err(ctx, http.StatusBadRequest, err)
@@ -53,7 +53,7 @@ func (h UserHandlerImpl) Create(ctx echo.Context) error {
 		return err
 	}
 
-	user, err := h.Svc.Store(&userDto)
+	user, err := h.SvcUser.Store(&userDto)
 
 	if err != nil {
 		response.Err(ctx, http.StatusBadRequest, err)
@@ -77,7 +77,7 @@ func (h UserHandlerImpl) Login(ctx echo.Context) error {
 		return err
 	}
 
-	res, err := h.Svc.Login(&userDto)
+	res, err := h.SvcUser.Login(&userDto)
 
 	if err != nil {
 		response.Err(ctx, http.StatusUnauthorized, err)
@@ -91,7 +91,7 @@ func (h UserHandlerImpl) Login(ctx echo.Context) error {
 func (h UserHandlerImpl) Refresh(ctx echo.Context) error {
 	userId := ctx.Get("user_id").(float64)
 
-	res, err := h.Svc.Refresh(uint(userId))
+	res, err := h.SvcUser.Refresh(uint(userId))
 
 	if err != nil {
 		response.Err(ctx, http.StatusBadRequest, err)

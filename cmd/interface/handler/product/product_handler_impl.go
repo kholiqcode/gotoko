@@ -10,14 +10,32 @@ import (
 )
 
 type ProductHandlerImpl struct {
-	Svc service.ProductService
+	SvcProduct service.ProductService
+}
+
+func (h ProductHandlerImpl) CreateCategory(ctx echo.Context) error {
+	var request dto.CategoryStoreRequest
+
+	if err := ctx.Bind(&request); err != nil {
+		response.Err(ctx, 400, err)
+		return err
+	}
+
+	category, err := h.SvcProduct.StoreCategory(&request)
+
+	if err != nil {
+		response.Err(ctx, 400, err)
+		return err
+	}
+
+	response.Json(ctx, http.StatusCreated, "Success", category)
+	return nil
 }
 
 func (h ProductHandlerImpl) Get(ctx echo.Context) error {
-
 	pagination := database.NewPagination(ctx)
 
-	products, err := h.Svc.GetProducts(pagination)
+	products, err := h.SvcProduct.GetProducts(pagination)
 
 	if err != nil {
 		response.Err(ctx, 400, err)
@@ -26,12 +44,36 @@ func (h ProductHandlerImpl) Get(ctx echo.Context) error {
 
 	response.Json(ctx, http.StatusOK, "Success", map[string]interface{}{
 		"products": map[string]interface{}{
-			"data":      products,
-			"sort":      pagination.GetSort(),
-			"page":      pagination.GetPage(),
-			"pageSize":  pagination.GetLimit(),
-			"totalPage": pagination.GetTotalPage(),
-			"totalRows": pagination.GetTotalRows(),
+			"data":       products,
+			"sort":       pagination.GetSort(),
+			"page":       pagination.GetPage(),
+			"page_size":  pagination.GetLimit(),
+			"total_page": pagination.GetTotalPage(),
+			"total_rows": pagination.GetTotalRows(),
+		},
+	})
+	return nil
+}
+
+func (h ProductHandlerImpl) GetCategory(ctx echo.Context) error {
+
+	pagination := database.NewPagination(ctx)
+
+	categories, err := h.SvcProduct.GetCategories(pagination)
+
+	if err != nil {
+		response.Err(ctx, 400, err)
+		return err
+	}
+
+	response.Json(ctx, http.StatusOK, "Success", map[string]interface{}{
+		"products": map[string]interface{}{
+			"data":       categories,
+			"sort":       pagination.GetSort(),
+			"page":       pagination.GetPage(),
+			"page_size":  pagination.GetLimit(),
+			"total_page": pagination.GetTotalPage(),
+			"total_rows": pagination.GetTotalRows(),
 		},
 	})
 	return nil
@@ -40,7 +82,7 @@ func (h ProductHandlerImpl) Get(ctx echo.Context) error {
 func (h ProductHandlerImpl) Detail(ctx echo.Context) error {
 	slug := ctx.Param("slug")
 
-	product, err := h.Svc.GetProductBySlug(slug)
+	product, err := h.SvcProduct.GetProductBySlug(slug)
 
 	if err != nil {
 		response.Err(ctx, 400, err)
@@ -58,7 +100,7 @@ func (h ProductHandlerImpl) Create(ctx echo.Context) error {
 		return err
 	}
 
-	product, err := h.Svc.Store(&productStoreDto)
+	product, err := h.SvcProduct.Store(&productStoreDto)
 
 	if err != nil {
 		response.Err(ctx, 400, err)

@@ -7,12 +7,13 @@ import (
 )
 
 type Product struct {
-	ID          uint    `gorm:"primaryKey;autoIncrement;<-:create"`
-	Name        string  `gorm:"not null"`
-	Description string  `gorm:"not null;type:text"`
-	Slug        string  `gorm:"unique;not null;size:50"`
-	Stock       uint    `gorm:"not null;default:0"`
-	Price       float64 `gorm:"not null;default:0"`
+	ID            uint    `gorm:"primaryKey;autoIncrement;<-:create"`
+	Name          string  `gorm:"not null"`
+	Description   string  `gorm:"not null;type:text"`
+	FeaturedImage string  `gorm:"-:migration;<-:false"`
+	Slug          string  `gorm:"unique;not null;size:50"`
+	Stock         uint    `gorm:"not null;default:0"`
+	Price         float64 `gorm:"not null;default:0"`
 
 	CreatedAt time.Time `gorm:"type:DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP"`
 	UpdatedAt time.Time `gorm:"type:DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"`
@@ -55,6 +56,8 @@ type Category struct {
 	ProductCategory []ProductCategory `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
+type CategoryList []*Category
+
 // Pivot Entity
 type ProductCategory struct {
 	ID         uint `gorm:"primaryKey;autoIncrement;<-:create"`
@@ -68,4 +71,13 @@ type ProductCategory struct {
 	//Relations
 	Product  Product  `gorm:"foreignKey:ProductID;references:ID"`
 	Category Category `gorm:"foreignKey:CategoryID;references:ID"`
+}
+
+func (u *Product) AfterFind(tx *gorm.DB) (err error) {
+	var featuredImage string
+	if len(u.ProductGallery) > 0 {
+		featuredImage = u.ProductGallery[0].Path
+	}
+	u.FeaturedImage = featuredImage
+	return
 }

@@ -36,6 +36,18 @@ type ProductCategoryResponse struct {
 	AltDescription string `json:"alt_description"`
 }
 
+type CategoryResponse struct {
+	ID             uint      `json:"id"`
+	Name           string    `json:"name"`
+	AltTitle       string    `json:"alt_title"`
+	AltDescription string    `json:"alt_description"`
+	Slug           string    `json:"slug"`
+	CreatedAt      time.Time `json:"created_at,omitempty"`
+	UpdatedAt      time.Time `json:"updated_at,omitempty"`
+}
+
+type CategoryListResponse []*CategoryResponse
+
 func CreateProductResponse(product *entity.Product) ProductResponse {
 
 	var categoryResp []ProductCategoryResponse
@@ -80,8 +92,31 @@ func CreateProductResponse(product *entity.Product) ProductResponse {
 func CreateProductListResponse(products *entity.ProductList) ProductListResponse {
 	productResp := ProductListResponse{}
 	for _, p := range *products {
-		user := CreateProductResponse(p)
-		productResp = append(productResp, &user)
+		product := CreateProductResponse(p)
+		productResp = append(productResp, &product)
 	}
 	return productResp
+}
+
+func CreateCategoryResponse(category *entity.Category) CategoryResponse {
+	categoryResp := CategoryResponse{
+		ID:             category.ID,
+		Name:           category.Name,
+		Slug:           category.Slug,
+		AltTitle:       category.AltTitle.String,
+		AltDescription: category.AltDescription.String,
+		CreatedAt:      category.CreatedAt,
+		UpdatedAt:      category.UpdatedAt,
+	}
+
+	return categoryResp
+}
+
+func CreateCategoryListResponse(categories *entity.CategoryList) CategoryListResponse {
+	categoryResp := CategoryListResponse{}
+	for _, p := range *categories {
+		category := CreateCategoryResponse(p)
+		categoryResp = append(categoryResp, &category)
+	}
+	return categoryResp
 }

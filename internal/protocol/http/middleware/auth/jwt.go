@@ -60,6 +60,7 @@ func JwtVerifyRefresh() echo.MiddlewareFunc {
 				claims := t.Claims.(jwt.MapClaims)
 				rawExp := claims["exp"].(float64)
 				exp := int64(rawExp)
+
 				if t.Method.Alg() != "HS256" {
 					log.Err(errors.New("unexpected signing method")).Msgf("unexpected signing method: %v", t.Method.Alg())
 					return nil, errors.New("unexpected jwt signing method")

@@ -11,7 +11,7 @@ import (
 )
 
 var userRepository = &repository.UserRepositoryMock{Mock: mock.Mock{}}
-var userService = UserServiceImpl{Repo: userRepository}
+var userService = UserServiceImpl{RepoUser: userRepository}
 
 func TestUserService_GetUserByIdFail(t *testing.T) {
 

@@ -3,7 +3,9 @@ package handler
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"toko/cmd/interface/handler/cart"
 	"toko/cmd/interface/handler/health"
+	"toko/cmd/interface/handler/order"
 	"toko/cmd/interface/handler/product"
 	"toko/cmd/interface/handler/user"
 	"toko/internal/protocol/http/middleware/auth"
@@ -12,17 +14,23 @@ import (
 type HttpHandlerImpl struct {
 	user    user.UserHandler
 	product product.ProductHandler
+	cart    cart.CartHandler
+	order   order.OrderHandler
 	health  health.HealthHandler
 }
 
 func NewHttpHandler(
 	user user.UserHandler,
 	product product.ProductHandler,
+	cart cart.CartHandler,
+	order order.OrderHandler,
 	health health.HealthHandler,
 ) *HttpHandlerImpl {
 	return &HttpHandlerImpl{
 		user:    user,
 		product: product,
+		cart:    cart,
+		order:   order,
 		health:  health,
 	}
 }
@@ -51,7 +59,23 @@ func (h *HttpHandlerImpl) RegisterPath(e *echo.Echo) {
 	productGroup := e.Group("product")
 	{
 		productGroup.GET("", h.product.Get)
+		productGroup.GET("/category", h.product.GetCategory)
 		productGroup.GET("/:slug", h.product.Detail)
 		productGroup.POST("", h.product.Create)
+		productGroup.POST("/category", h.product.CreateCategory)
+	}
+
+	cartGroup := e.Group("cart")
+	{
+		cartGroup.GET("", h.cart.Get, auth.JwtVerifyAccess())
+		cartGroup.POST("", h.cart.Add, auth.JwtVerifyAccess())
+		cartGroup.PUT("", h.cart.Edit, auth.JwtVerifyAccess())
+		cartGroup.DELETE("/:id", h.cart.Remove, auth.JwtVerifyAccess())
+	}
+
+	orderGroup := e.Group("order")
+	{
+		orderGroup.GET("", h.order.Get, auth.JwtVerifyAccess())
+		orderGroup.POST("", h.order.Create, auth.JwtVerifyAccess())
 	}
 }

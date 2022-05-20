@@ -21,6 +21,16 @@ func (r ProductRepositoryImpl) FindAll(pagination *database.Pagination) (*entity
 	return &products, nil
 }
 
+func (r ProductRepositoryImpl) FindAllCategory(pagination *database.Pagination) (*entity.CategoryList, error) {
+	var categories entity.CategoryList
+
+	if e := r.Db.Debug().Scopes(database.Paginate(categories, pagination, r.Db)).Find(&categories).Error; e != nil {
+		return nil, e
+	}
+
+	return &categories, nil
+}
+
 func (r ProductRepositoryImpl) Find(productID uint) (*entity.Product, error) {
 	var product entity.Product
 
@@ -46,4 +56,11 @@ func (r ProductRepositoryImpl) Insert(product *entity.Product) (*entity.Product,
 		return nil, e
 	}
 	return product, nil
+}
+
+func (r ProductRepositoryImpl) InsertCategory(category *entity.Category) (*entity.Category, error) {
+	if e := r.Db.Debug().Create(&category).Error; e != nil {
+		return nil, e
+	}
+	return category, nil
 }

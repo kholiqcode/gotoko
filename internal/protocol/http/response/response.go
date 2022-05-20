@@ -9,7 +9,7 @@ import (
 type Response struct {
 	Code    int         `json:"code"`
 	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
+	Result  interface{} `json:"result"`
 }
 
 func Json(c echo.Context, httpCode int, message string, data interface{}) {
@@ -18,7 +18,7 @@ func Json(c echo.Context, httpCode int, message string, data interface{}) {
 	res := Response{
 		Code:    httpCode,
 		Message: message,
-		Data:    data,
+		Result:  data,
 	}
 	json.NewEncoder(c.Response()).Encode(res)
 }
