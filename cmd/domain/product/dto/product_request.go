@@ -10,3 +10,9 @@ type ProductStoreRequest struct {
 	Categories  []uint                  `json:"categories" form:"categories"`
 	Images      []*multipart.FileHeader `json:"images" form:"images"`
 }
+
+type CategoryStoreRequest struct {
+	Name           string `json:"name" form:"name"`
+	AltTitle       string `json:"alt_title" form:"alt_title"`
+	AltDescription string `json:"alt_description" form:"alt_description"`
+}

@@ -14,13 +14,13 @@ import (
 )
 
 type UserServiceImpl struct {
-	Repo     repository.UserRepository
+	RepoUser repository.UserRepository
 	JwtAuth  auth.JwtToken
 	repoOnce sync.Once
 }
 
 func (s UserServiceImpl) GetUsers() (*dto.UserListResponse, error) {
-	users, err := s.Repo.FindAll()
+	users, err := s.RepoUser.FindAll()
 	if err != nil {
 		log.Err(err).Msg("Error fetch users from DB")
 		return nil, err
@@ -30,7 +30,7 @@ func (s UserServiceImpl) GetUsers() (*dto.UserListResponse, error) {
 }
 
 func (s UserServiceImpl) GetUserById(userId uint) (*dto.UserResponse, error) {
-	user, err := s.Repo.Find(userId)
+	user, err := s.RepoUser.Find(userId)
 	if err != nil {
 		log.Err(err).Msg("Error fetch user from DB")
 		return nil, err
@@ -46,7 +46,7 @@ func (s UserServiceImpl) Store(request *dto.UserRequestBody) (*dto.UserResponse,
 		return nil, err
 	}
 
-	userRepo, err := s.Repo.Insert(&entity.User{
+	userRepo, err := s.RepoUser.Insert(&entity.User{
 		Name:     request.Name,
 		Email:    request.Email,
 		Password: passwordHashed,
@@ -63,7 +63,7 @@ func (s UserServiceImpl) Store(request *dto.UserRequestBody) (*dto.UserResponse,
 }
 
 func (s UserServiceImpl) Login(request *dto.UserRequestLogin) (*dto.UserAuthResponse, error) {
-	user, err := s.Repo.FindByEmail(request.Email)
+	user, err := s.RepoUser.FindByEmail(request.Email)
 	if err != nil {
 		log.Err(err).Msg("Error fetch user from DB")
 		return nil, errors.FindErrorType(err)
@@ -88,7 +88,7 @@ func (s UserServiceImpl) Login(request *dto.UserRequestLogin) (*dto.UserAuthResp
 }
 
 func (s UserServiceImpl) Refresh(userId uint) (*dto.UserAuthResponse, error) {
-	user, err := s.Repo.Find(userId)
+	user, err := s.RepoUser.Find(userId)
 	if err != nil {
 		log.Err(err).Msg("Error fetch user from DB")
 		return nil, errors.FindErrorType(err)

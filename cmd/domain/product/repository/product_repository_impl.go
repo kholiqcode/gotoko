@@ -21,17 +21,46 @@ func (r ProductRepositoryImpl) FindAll(pagination *database.Pagination) (*entity
 	return &products, nil
 }
 
+func (r ProductRepositoryImpl) FindAllCategory(pagination *database.Pagination) (*entity.CategoryList, error) {
+	var categories entity.CategoryList
+
+	if e := r.Db.Debug().Scopes(database.Paginate(categories, pagination, r.Db)).Find(&categories).Error; e != nil {
+		return nil, e
+	}
+
+	return &categories, nil
+}
+
 func (r ProductRepositoryImpl) Find(productID uint) (*entity.Product, error) {
-	//TODO implement me
-	panic("implement me")
+	var product entity.Product
+
+	if e := r.Db.Debug().Preload("ProductCategory.Category").Preload("ProductGallery").Preload(clause.Associations).First(&product, productID).Error; e != nil {
+		return nil, e
+	}
+
+	return &product, nil
 }
 
 func (r ProductRepositoryImpl) FindBySlug(slug string) (*entity.Product, error) {
-	//TODO implement me
-	panic("implement me")
+	var product entity.Product
+
+	if e := r.Db.Debug().Preload("ProductCategory.Category").Preload("ProductGallery").Preload(clause.Associations).First(&product, "slug = ?", slug).Error; e != nil {
+		return nil, e
+	}
+
+	return &product, nil
 }
 
 func (r ProductRepositoryImpl) Insert(product *entity.Product) (*entity.Product, error) {
-	//TODO implement me
-	panic("implement me")
+	if e := r.Db.Debug().Create(&product).Preload("ProductCategory.Category").Error; e != nil {
+		return nil, e
+	}
+	return product, nil
+}
+
+func (r ProductRepositoryImpl) InsertCategory(category *entity.Category) (*entity.Category, error) {
+	if e := r.Db.Debug().Create(&category).Error; e != nil {
+		return nil, e
+	}
+	return category, nil
 }

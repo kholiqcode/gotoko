@@ -6,6 +6,8 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	_cartEntity "toko/cmd/domain/cart/entity"
+	_orderEntity "toko/cmd/domain/order/entity"
 	_productEntity "toko/cmd/domain/product/entity"
 	_userEntity "toko/cmd/domain/user/entity"
 	"toko/config"
@@ -100,5 +102,14 @@ func TestDatabase(cfg *config.Config) *DatabaseImpl {
 }
 
 func initMigrate(db *gorm.DB) {
-	db.AutoMigrate(&_userEntity.User{}, &_productEntity.Product{}, &_productEntity.ProductGallery{}, &_productEntity.Category{}, &_productEntity.ProductCategory{})
+	db.AutoMigrate(
+		&_userEntity.User{},
+		&_productEntity.Product{},
+		&_productEntity.ProductGallery{},
+		&_productEntity.Category{},
+		&_productEntity.ProductCategory{},
+		&_cartEntity.Cart{},
+		&_orderEntity.Order{},
+		&_orderEntity.OrderDetail{},
+	)
 }
