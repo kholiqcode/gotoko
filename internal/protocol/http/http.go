@@ -64,5 +64,4 @@ func (p *HttpImpl) Listen() {
 		log.Error().Msgf("Server forced to shutdown: %v", err)
 	}
 	log.Info().Msg("Server exiting:")
-
 }

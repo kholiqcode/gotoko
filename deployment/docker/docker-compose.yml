@@ -1,0 +1,40 @@
+version: '3'
+services:
+  api:
+    container_name: api
+    image: kholiq/gotoko:1.0.0
+    build:
+      context: ../..
+      dockerfile: deployment/docker/dockerfiles/go/Dockerfile
+    stdin_open: true
+    tty: true
+    volumes:
+      - api:/app
+    ports:
+      - "8181:8181"
+    restart: always
+    depends_on:
+      - mysql_db
+    networks:
+      - rest_network
+
+  mysql_db:
+    container_name: database
+    build: dockerfiles/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3306"
+    env_file:
+      - dockerfiles/mysql/.env
+    volumes:
+      - database_mysql:/var/lib/mysql
+    networks:
+      - rest_network
+
+volumes:
+  api:
+  database_mysql:
+
+networks:
+  rest_network:
+    driver: bridge
